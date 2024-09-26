@@ -1,6 +1,6 @@
 {
   "name": "@stegopop/media-picker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Media Picker Tool for EditorJS",
   "main": "dist/media-picker.js",
   "repository": "https://github.com/Arcanely/media-picker.git",
