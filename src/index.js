@@ -3,21 +3,6 @@ import notifier from 'codex-notifier';
 import Ele from '@stegopop/ele';
 import { IconCross } from '@codexteam/icons';
 
-const DICTIONARY = {
-  toolName: 'Media Library',
-  searchPlaceholder: 'Search',
-  searchRequestError: 'Cannot process search request because of',
-  invalidServerData: 'Server responded with invalid data',
-  captionPlaceholder: 'Caption',
-  expandTooltip: 'View Details',
-  selectNewFileTooltip: 'Select New File',
-  tab: 'tab',
-  filename: 'Filename',
-  altText: 'Alt Text',
-  first: 'First',
-  last: 'Last'
-};
-
 /**
  * Timeout before search in ms after key pressed
  *
@@ -26,11 +11,8 @@ const DICTIONARY = {
 const DEBOUNCE_TIMEOUT = 250;
 
 /**
- * @typedef {string} NavDirection
- */
-/**
  * Enum specifying keyboard navigation directions
- *
+ * 
  * @enum {NavDirection}
  */
 const NavDirection = {
@@ -45,7 +27,7 @@ export default class MediaPicker {
 
   static get toolbox() {
     return {
-      title: DICTIONARY.toolName,
+      title: 'Media Picker',
       icon: require('../icons/images.svg'),
     };
   }
@@ -104,6 +86,20 @@ export default class MediaPicker {
      * this.config.queryParam
      */
 
+    this.DICTIONARY = {
+      searchPlaceholder: this.api.i18n.t('Search'),
+      searchRequestError: this.api.i18n.t('Cannot process search request because of'),
+      invalidServerData: this.api.i18n.t('Server responded with invalid data'),
+      captionPlaceholder: this.api.i18n.t('Caption'),
+      expandTooltip: this.api.i18n.t('View Details'),
+      selectNewFileTooltip: this.api.i18n.t('Select New File'),
+      tab: this.api.i18n.t('tab'),
+      filename: this.api.i18n.t('Filename'),
+      altText: this.api.i18n.t('Alt Text'),
+      first: this.api.i18n.t('First'),
+      last: this.api.i18n.t('Last')
+    };
+
     this.nodes = {
       wrapper: null,
       library: null,
@@ -150,7 +146,7 @@ export default class MediaPicker {
       element: "input",
       type: "text",
       class: "ce-mediapicker-search",
-      placeholder: DICTIONARY.searchPlaceholder
+      placeholder: this.DICTIONARY.searchPlaceholder
     });
     this.nodes.searchResults = Ele.mint({
       element: "div",
@@ -209,12 +205,12 @@ export default class MediaPicker {
       element: "input",
       type: "text",
       class: "ce-mediapicker-caption",
-      placeholder: DICTIONARY.captionPlaceholder
+      placeholder: this.DICTIONARY.captionPlaceholder
     });
     this.nodes.captionTabToComplete = Ele.mint({
       element: "div",
       class: "ce-mediapicker-tab-to-complete",
-      text: DICTIONARY.tab
+      text: this.DICTIONARY.tab
     });
     this.nodes.replace = Ele.mint({
         element: "button",
@@ -259,7 +255,7 @@ export default class MediaPicker {
     });
 
     // Set tooltips
-    this.api.tooltip.onHover(this.nodes.replace, DICTIONARY.selectNewFileTooltip, { placement: 'top'});
+    this.api.tooltip.onHover(this.nodes.replace, this.DICTIONARY.selectNewFileTooltip, { placement: 'top'});
 
     // Listen to pressed enter, tab, and shift keys
     [this.nodes.search, this.nodes.caption, this.nodes.replace].forEach(node => {
@@ -331,18 +327,19 @@ export default class MediaPicker {
   }
 
   save() {
+    let html = `<img class='mediapicker-image' src='${this.selectedFile.src}' alt='${this.selectedFile.alt}' data-filename='${this.selectedFile.filename}' data-extension='${this.selectedFile.extension}'>`;
+    let caption = this.nodes.caption.value;
+    let htmlWithCaption = `<figure class='mediapicker-figure'>${html}<figcaption>${caption}</figcaption></figure>`
     return {
       src: this.selectedFile.src,
       alt: this.selectedFile.alt,
       filename: this.selectedFile.filename,
       extension: this.selectedFile.extension,
-      caption: this.nodes.caption.value
+      caption: caption,
+      html: html,
+      htmlWithCaption: htmlWithCaption
     };
-    // const savedData = this.api.saver.save();
   }
-
-  // TODO: i18n support
-  // placeholder: this.api.i18n.t(this.isServerEnabled() ? DICTIONARY.blah : DICTIONARY.blahblah),
 
   /**
    * Process keydown events to detect arrow keys or enter pressed
@@ -411,7 +408,7 @@ export default class MediaPicker {
           this.generateSearchPagination(searchDataResponse.page, searchDataResponse.totalPages);
         } catch (e) {
           notifier.show({
-            message: `${DICTIONARY.searchRequestError} "${e.message}"`,
+            message: `${this.DICTIONARY.searchRequestError} "${e.message}"`,
             style: 'error',
           });
         }
@@ -456,7 +453,7 @@ export default class MediaPicker {
           this.generateSearchPagination(searchDataResponse.page, searchDataResponse.totalPages);
         } catch (e) {
           notifier.show({
-            message: `${DICTIONARY.searchRequestError} "${e.message}"`,
+            message: `${this.DICTIONARY.searchRequestError} "${e.message}"`,
             style: 'error',
           });
         }
@@ -560,7 +557,7 @@ export default class MediaPicker {
     // If files data is not an array
     if (!Array.isArray(files)) {
       notifier.show({
-        message: DICTIONARY.invalidServerData,
+        message: this.DICTIONARY.invalidServerData,
         style: 'error',
       });
       return;
@@ -634,7 +631,7 @@ export default class MediaPicker {
 
       // Set tooltips
       this.api.tooltip.onHover(searchFileName, file.filename + "." + file.extension, { placement: 'top'});
-      this.api.tooltip.onHover(expandFile, DICTIONARY.expandTooltip, { placement: 'top'});
+      this.api.tooltip.onHover(expandFile, this.DICTIONARY.expandTooltip, { placement: 'top'});
 
       // Add tab navigation and enter listeners
       searchFilePreviewElementButton.addEventListener('keydown', this.fieldKeydownHandler.bind(this));
@@ -664,6 +661,9 @@ export default class MediaPicker {
   generateSearchPagination(page, totalPages) {
     this.nodes.searchPagination.innerHTML = "";
     let numPageButtons = 7;
+    if (totalPages < numPageButtons) {
+      numPageButtons = totalPages;
+    }
     let half = Math.ceil(numPageButtons/2);
     let startingPage = parseInt(page)-(half-1) > 0 ? parseInt(page)-(half-1) : 1;
     let endingPage = startingPage+numPageButtons-1;
@@ -680,7 +680,7 @@ export default class MediaPicker {
       let firstPageButton = Ele.mint({
         element: 'button',
         type: 'button',
-        text: DICTIONARY.first,
+        text: this.DICTIONARY.first,
         dataCeMediapickerPage: 1,
         class: 'ce-mediapicker-pagination-button',
       });
@@ -710,7 +710,7 @@ export default class MediaPicker {
       let lastPageButton = Ele.mint({
         element: 'button',
         type: 'button',
-        text: DICTIONARY.last,
+        text: this.DICTIONARY.last,
         dataCeMediapickerPage: totalPages,
         class: 'ce-mediapicker-pagination-button',
       });
@@ -757,7 +757,7 @@ export default class MediaPicker {
       this.nodes.caption.value = "";
 
       if (element.alt == "" || element.alt == "null") {
-        this.nodes.caption.placeholder = DICTIONARY.captionPlaceholder;
+        this.nodes.caption.placeholder = this.DICTIONARY.captionPlaceholder;
         this.nodes.caption.removeAttribute('data-mediapicker-tab-to-complete', '');
         // remove event listener
         this.nodes.caption.parentElement.querySelector("div.ce-mediapicker-tab-to-complete").removeEventListener('click', this.tabToComplete);
@@ -813,8 +813,8 @@ export default class MediaPicker {
 
   openExpandedPreview(element) {
     // set the details of the expanded preview
-    this.nodes.expandedPreviewFilename.innerHTML = `${DICTIONARY.filename}: ` + element.dataset['filename'] + "." + element.dataset['extension'];
-    this.nodes.expandedPreviewAlt.innerHTML = `${DICTIONARY.altText}: ${(element.alt == 'null' || element.alt == '') ? '' : element.alt}`;
+    this.nodes.expandedPreviewFilename.innerHTML = `${this.DICTIONARY.filename}: ` + element.dataset['filename'] + "." + element.dataset['extension'];
+    this.nodes.expandedPreviewAlt.innerHTML = `${this.DICTIONARY.altText}: ${(element.alt == 'null' || element.alt == '') ? '' : element.alt}`;
     document.documentElement.style.setProperty('--ce-mediapicker-expanded-background-image', "url('" + element.src + "')");
     this.nodes.expandedPreview.style.backgroundImage = `url('${element.src}')`;
     this.nodes.expandedPreviewExit.setAttribute('data-ce-mediapicker-showing-img', element.src);
@@ -867,7 +867,7 @@ export default class MediaPicker {
       }
     } catch (e) {
       notifier.show({
-        message: `${DICTIONARY.searchRequestError} "${e.message}"`,
+        message: `${this.DICTIONARY.searchRequestError} "${e.message}"`,
         style: 'error',
       });
     }
