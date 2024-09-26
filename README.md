@@ -1,6 +1,6 @@
 # Media Picker
 
-example video here
+https://github.com/user-attachments/assets/cb45ba8c-40b1-4ff6-b970-b05fe2803a39
 
 ## Installation
 
