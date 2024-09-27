@@ -21,7 +21,7 @@ yarn add -D @stegopop/media-picker
 You can use package from jsDelivr CDN.
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@stegopop/media-picker"></script>
+<script src="https://cdn.jsdelivr.net/npm/@stegopop/media-picker/dist/media-picker.js"></script>
 ```
 
 ## Usage
@@ -29,6 +29,8 @@ You can use package from jsDelivr CDN.
 Add a new Tool to the `tools` property of the Editor.js initial config.
 
 ```javascript
+import MediaPicker from "@stegopop/media-picker/dist/media-picker";
+
 var editor = EditorJS({
   ...
  

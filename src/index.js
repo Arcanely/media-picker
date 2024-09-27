@@ -192,7 +192,7 @@ export default class MediaPicker {
     this.nodes.previewImg = Ele.mint({
       element: "img",
       class: "ce-mediapicker-preview-img",
-      src: "https://placehold.co/250x150/black/0f0"
+      src: "#"
     });
     this.nodes.preview = Ele.mint({
       element: "div",
@@ -327,18 +327,20 @@ export default class MediaPicker {
   }
 
   save() {
-    let html = `<img class='mediapicker-image' src='${this.selectedFile.src}' alt='${this.selectedFile.alt}' data-filename='${this.selectedFile.filename}' data-extension='${this.selectedFile.extension}'>`;
-    let caption = this.nodes.caption.value;
-    let htmlWithCaption = `<figure class='mediapicker-figure'>${html}<figcaption>${caption}</figcaption></figure>`
-    return {
-      src: this.selectedFile.src,
-      alt: this.selectedFile.alt,
-      filename: this.selectedFile.filename,
-      extension: this.selectedFile.extension,
-      caption: caption,
-      html: html,
-      htmlWithCaption: htmlWithCaption
-    };
+    if (this.selectedFile) {
+      let html = `<img class='mediapicker-image' src='${this.selectedFile.src}' alt='${this.selectedFile.alt}' data-filename='${this.selectedFile.filename}' data-extension='${this.selectedFile.extension}'>`;
+      let caption = this.nodes.caption.value;
+      let htmlWithCaption = `<figure class='mediapicker-figure'>${html}<figcaption>${caption}</figcaption></figure>`
+      return {
+        src: this.selectedFile.src,
+        alt: this.selectedFile.alt,
+        filename: this.selectedFile.filename,
+        extension: this.selectedFile.extension,
+        caption: caption,
+        html: html,
+        htmlWithCaption: htmlWithCaption
+      };
+    }
   }
 
   /**
